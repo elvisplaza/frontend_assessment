@@ -1,25 +1,75 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import './styling/app.css';
+import StudentInfo from './StudentInfo';
+
+const url = "https://www.hatchways.io/api/assessment/students";
 
 class App extends Component {
-  render() {
+  constructor(){
+    super()
+    this.state= {
+      studentList: [],
+      tagToAdd:"",
+      tagList:[]
+    }
+  }
+  componentDidMount(){
+    axios.get(`${url}`)
+    .then((res)=>{
+      let students = res.data.students;
+      // console.log(students);
+      this.setState({studentList:students})
+    })
+  }
+
+  handleChange = (e)=>{
+    this.setState({[e.target.name]:e.target.value})
+  }
+  
+  addTagToList= (e)=>{
+    e.preventDefault();
+    let copyOfTagList = this.state.tagList;
+    let tagger = {
+      id:e.target.id,
+      tag:copyOfTagList
+    }
+    copyOfTagList.push(this.state.tagToAdd)
+    
+    this.setState({tagList:tagger, tagToAdd:""})
+  }
+
+
+  render(){
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <ul>
+            {this.state.studentList !== null? 
+              this.state.studentList.map((student,counter)=>{
+                return(
+                  <StudentInfo 
+                    key={counter}
+                    id={student.firstName}
+                    pic={student.pic}
+                    firstName={student.firstName}
+                    lastName={student.lastName}
+                    email={student.email}
+                    company={student.company}
+                    skill={student.skill}
+                    grades={student.grades}
+                    handleChange={this.handleChange}
+                    addTag={this.addTagToList}
+                    name="tagToAdd"
+                    tagList={this.state.tagList}
+                    value={this.state.tagToAdd}
+                    
+                  />
+                )
+              })
+              :
+              null
+            }
+        </ul>
       </div>
     );
   }
